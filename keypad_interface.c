@@ -41,30 +41,26 @@ void init_keypad(void) {
  * Returns:
  *  - The character that was pressed, if there was one, '\0' if no button was pressed
  */
-char check_keypress(void) {
-    //check for button press
-    //char btnVal = '\0';
+char check_keypress() {
     int i, j;
-    for(i = 6; i >= 3; i--) {                       //For each row of the 4 rows,
-        P2OUT ^= 1 << i;                            //set that row LOW
-        for(j = 2; j >= 0; j--) {                   //Then loop through each col of the 3 cols
-            P2DIR ^= 1 << j;                        //set that col to input
-            if(!(P2IN & (1 << j))){                 //Then if the value of the col input is 0 --> col and row shorted --> button at (row, col) was pressed
-                if(!keyPressed[i - 3][j]) {         //Check if the button went up before being pressed
-                    //write_char(keypad[i - 3][j]);
-                    keyPressed[i - 3][j] = 1;       //Mark that the button was pressed, so another character is not returned for the same button
-                    //btnVal =  keypad[i - 3][j];
-                    return keypad[i - 3][j];        //If yes, then return the character pressed,
-                }                                   //press without the button first going up
-            }                                       //If the button didn't go up before being pressed, then we know a character was already returned for this button press
-            else {
-                keyPressed[i - 3][j] = 0;           //If the button was not pressed, we mark that that button has gone up
+    char read = '\0';
+    for(i = 6; i >= 3; i--) {                   // loop through rows
+        P2OUT ^= 1 << i;                        // set one row to 0
+        for(j = 2; j >= 0; j--) {               // for each row, loop through all cols
+            P2DIR ^= 1 << j;                    // set col to input
+            if(!(P2IN & (1 << j))){             // if col input value is 0, button was pressed
+                if(!keyPressed[i - 3][j]) {
+                    read = keypad[i - 3][j];
+                    keyPressed[i - 3][j] = 1;   // key down (for debouncing)
+                }
             }
-            P2DIR ^= 1 << j;                        //set the col that was changed to input to output again
+            else {
+                keyPressed[i - 3][j] = 0;
+            }
+            P2DIR ^= 1 << j;
         }
-        P2OUT ^= 1 << i;                            //set the row that was changed to LOW to HIGH again
+        P2OUT ^= 1 << i;
     }
 
-    //return btnVal;
-    return '\0';                                    //No button pressed
+    return read;
 }

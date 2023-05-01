@@ -27,8 +27,6 @@
 //Controls display
 #define LCD_DISPLAY_CTRL    0x08    //Values below can be used to turn on display/cursor/cursor blink
 #define LCD_DISPLAY_ON      0x04
-#define LCD_CURSOR_ON       0x02
-#define LCD_CURSOR_BLINK    0x01
 //END display control
 
 
@@ -41,7 +39,15 @@
 #define LCD_CURSOR_INCR     0x02
 //END entry mode set
 
+// set cursor position
+#define LCD_RETURNHOME      0x02    //!< Set cursor position to zero
+#define LCD_SETDDRAMADDR    0x80    //!< Used to set the DDRAM (Display Data RAM)
 
+#define LCD_DISPLAYCONTROL  0x08    //!< Controls the display; does stuff like turning it off and on
+#define LCD_CURSORON        0x02    //!< Turns the cursor on
+#define LCD_CURSOROFF       0x00    //!< Turns the cursor off
+#define LCD_BLINKON         0x01    //!< Turns on the blinking cursor
+#define LCD_BLINKOFF        0x00    //!< Turns off the blinking cursor
 
 void spi_send(const uint8_t data);
 
@@ -57,5 +63,18 @@ void write_string(char str[]);
 
 void init_LCD(void);
 
+void clear_screen(void);
+
+void home();
+
+void setCursor(uint8_t, uint8_t);
+
+void noCursor();
+
+void cursor();
+
+void noBlink();
+
+void blink();
 
 #endif /* ADAFRUIT_LCD_BACKPACK_INTERFACE_H_ */
