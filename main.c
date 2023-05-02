@@ -60,6 +60,7 @@ void initialize_all() {
     time_char_read = 0;
     wait_for_start = 0;
     start_timing = 0;
+    attempt_num = 0;
     hour = 0;
     minute = 0;
     second = 0;
