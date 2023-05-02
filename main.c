@@ -33,7 +33,7 @@ int     solution_int = -1;                  // integer form of solution
 char    solution_str_1[1];                  // string form of solution
 char    solution_str_2[2];                  // string form of solution
 char    solution_str_3[3];                  // string form of solution
-
+int     attempt_num = 0;
 
 struct Equation equ1;
 
@@ -51,6 +51,23 @@ int set_inputTime_pos(int charRead) {
 
 int set_inputSol_pos(int charRead) {
     return charRead + 6;
+}
+
+void initialize_all() {
+    clear_screen();
+    TA0CCR1 = 0;
+    question_on = 0;
+    time_char_read = 0;
+    wait_for_start = 0;
+    start_timing = 0;
+    hour = 0;
+    minute = 0;
+    second = 0;
+    memset(in_time, '0',strlen(in_time));
+    memset(hour_str, ' ',strlen(hour_str));
+    memset(min_str, ' ',strlen(min_str));
+    memset(sec_str, ' ',strlen(sec_str));
+    memset(in_solution, ' ',strlen(in_solution));
 }
 
 /**
@@ -109,6 +126,12 @@ int main(void)
             setCursor(cursor_pos, 0);
             blink();
             if (read != '\0') {
+                if (time_char_read >= 1) {
+                    if (read == '*') {
+                        time_char_read -= 1;
+                        in_time[time_char_read] = '0';
+                    }
+                }
                 if (time_char_read == 2 | time_char_read == 4) {
                     // tens digit of minute and second, could only be <=5
                     if (read == '1' | read == '2' | read == '3' | read == '4' | read == '5' | read == '0') {
@@ -135,18 +158,31 @@ int main(void)
         if (wait_for_start) {
             if (!question_on) {
                 if (!start_timing) {
+
                     // display the line
                     noCursor();
                     home();
                     write_string(time_string);
                     setCursor(0, 1);
                     write_string("Press # to start");
+
+                    // input * to change previous time
+                    if (read == '*') {
+                        time_char_read -= 1;
+                        in_time[time_char_read] = '0';
+                        wait_for_start = 0;
+                        clear_screen();
+                    }
                 }
 
 
                 if (read == '#') {
-                    // start timing
+                    // start (restart) timing
                     start_timing = 1;
+
+                    memset(hour_str, ' ',strlen(hour_str));
+                    memset(min_str, ' ',strlen(min_str));
+                    memset(sec_str, ' ',strlen(sec_str));
 
                     // get input time to number
                     memcpy(hour_str, in_time, 2);
@@ -167,7 +203,10 @@ int main(void)
         }
 
         if (start_timing) {
-
+            // if input *, stop the timing and reset
+            if (read == '*') {
+                initialize_all();
+            }
         }
 
         if (question_on) {
@@ -206,7 +245,8 @@ int main(void)
                          if (solution_int == equ1.solution) {
                              TA0CCR1 = 0;
                          } else {
-                             TA0CCR1 -= 150;
+                             TA0CCR1 += 150;
+                             attempt_num += 1;
                          }
 
                          int j = 0;
@@ -214,6 +254,13 @@ int main(void)
                              in_solution[j] = ' ';
                          }
                          read_solution_num = 0;
+
+                         if (attempt_num == 5) {
+                             srand(start_time_seed + 10);
+                             equ1 = gen_equ();
+                             TA0CCR1 = 1500;
+                             attempt_num = 0;
+                         }
                      }
                      else if (read == '*') {
                          // do nothing
@@ -229,20 +276,7 @@ int main(void)
 
             if (solution_int == equ1.solution) {
                 // solution correct, set everything to zero to restart
-                clear_screen();
-                TA0CCR1 = 0;
-                question_on = 0;
-                time_char_read = 0;
-                wait_for_start = 0;
-                hour = 0;
-                minute = 0;
-                second = 0;
-                memset(in_time, '0',strlen(in_time));
-                memset(hour_str, ' ',strlen(hour_str));
-                memset(min_str, ' ',strlen(min_str));
-                memset(sec_str, ' ',strlen(sec_str));
-                memset(in_solution, ' ',strlen(in_solution));
-
+                initialize_all();
             }
 
         }
