@@ -75,9 +75,7 @@ void initialize_all() {
  */
 int main(void)
 {
-
-    WDTCTL = WDT_ADLY_16;                   // WDT interrupt
-    IE1 |= WDTIE;                           // Enable WDT interrupt
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
 
     // timer1A for 1 second
     BCSCTL3 |= LFXT1S_2;                    // ACLK = VLO
@@ -289,17 +287,6 @@ int main(void)
 	return 0;
 }
 
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=WDT_VECTOR
-__interrupt void watchdog_timer (void)
-#elif defined(__GNUC__)
-void __attribute__ ((interrupt(WDT_VECTOR))) watchdog_timer (void)
-#else
-#error Compiler not supported!
-#endif
-{
-  __bic_SR_register_on_exit(LPM3_bits);     // Clear LPM3 bits from 0(SR)
-}
 
 // Timer A1 interrupt service routine
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
